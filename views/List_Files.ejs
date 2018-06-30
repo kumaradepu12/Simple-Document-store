@@ -1,0 +1,148 @@
+<% include ./index %>
+
+<table class="table">
+    <thead>
+            <td><b>File Name</b></td>
+    </thead>
+    <tbody>
+    <% for(var i=0;i<files.length;i++){ %>
+    <tr>
+        <td><%= files[i]%></td>
+        <td><button class="btn btn-primary" data-toggle="modal" data-target="#renameModal" data-whatever="<%= files[i]%>">Rename</button></td>
+        <td><button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-whatever="<%= files[i]%>">Delete</button>
+        </td>
+        <td><button class="btn btn-danger" data-toggle="modal" data-target="#attributesModal" data-whatever="<%= files[i]%>">Get Attributes</button></td>
+        <div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="renameModalLabel">New message</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="/rename">
+                            <div class="form-group">
+                                <label for="recipient-name" class="col-form-label">Old Name:</label>
+                                <input type="text"  name="oldname" class="form-control" id="recipient-name">
+                            </div>
+                            <div class="form-group">
+                                <label for="message-text" class="col-form-label">Rename To:</label>
+                                <input type="text" name="newname" class="form-control" id="message-text">
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary renamefile">Submit</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="/delete">
+                            <div class="form-group">
+                                <input type="text" name="deletefilename" class="form-control" id="filename" hidden>
+                            </div>
+                            <button type="submit" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="attributesModal" tabindex="-1" role="dialog" aria-labelledby="attributesModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="attributesModalLabel">New message</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                                <label for="recipient-name" class="col-form-label">Created Time :</label>
+                                <input type="text"  name="oldname" class="form-control" id="createTime">
+                                <label for="message-text" class="col-form-label">last update Time </label>
+                                <input type="text" name="newname" class="form-control" id="updateTime">
+                            <label for="message-text" class="col-form-label">Access Time </label>
+                            <input type="text" name="newname" class="form-control" id="accessTime">
+                        <div class="form-group">
+                            <label for="message-text" class="col-form-label">Size(KB) </label>
+                            <input type="text" name="newname" class="form-control" id="size">
+                        </div>
+                        <button type="submit" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </tr>
+    <% }; %>
+    </tbody>
+
+
+</table>
+
+<script>
+    $('#renameModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('whatever') // Extract info from data-* attributes
+        var modal = $(this)
+        modal.find('.modal-title').text('Rename ' + recipient)
+        modal.find('.modal-body #recipient-name').val(recipient)
+        document.getElementById('recipient-name').readOnly = true;
+    })
+    $('#deleteModal').on('show.bs.modal',function (event) {
+        var button=$(event.relatedTarget)
+        var data=button.data('whatever')
+        var modal=$(this)
+        modal.find('.modal-title').text('Are you Sure want to Delete '+data )
+        modal.find('.modal-body #filename').val(data)
+    })
+    $('#attributesModal').on('show.bs.modal',function (event) {
+        var button=$(event.relatedTarget)
+        var data=button.data('whatever')
+        var modal=$(this)
+        modal.find('.modal-title').text('Details of  '+data )
+        var formdata={}
+        formdata.filename=data
+      console.log(data)
+        $.ajax({
+            url:"/attributes",
+            data:JSON.stringify({"fileName":data}),
+            type:"POST",
+            dataType: 'json',
+            processData: false,
+            contentType: 'application/json',
+            success:function (stats) {
+                console.log(stats)
+                modal.find('.modal-body #createTime').val(stats.createTime)
+                modal.find('.modal-body #updateTime').val(stats.modifiedTime)
+                modal.find('.modal-body #accessTime').val(stats.accessTime)
+                modal.find('.modal-body #size').val(stats.size)
+                document.getElementById('createTime').readOnly = true;
+                document.getElementById('updateTime').readOnly = true;
+                document.getElementById('accessTime').readOnly = true;
+                document.getElementById('size').readOnly = true;
+
+            }
+        })
+    })
+</script>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" ></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" ></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script>
+      $(document).ready(function () {
+          var listfiles=null
+          $(".upload-btn").on('click',function () {
+              var file=$("#upload-file").get(0).files[0]
+              var formData=new FormData();
+              formData.append("upload",file)
+              $.ajax({
+                  url:"/upload",
+                  data:formData,
+                  type:"POST",
+                  processData: false,
+                  contentType: false,
+                  success:function (response) {
+                      document.getElementById("List-files").submit();
+
+                  }
+              })
+          })
+
+      })
+  </script>
+
+
+</head>
+<body>
+  <div class="container-fluid d-md-inline-block" style="padding-top: 20px">
+    <div class="col-md-6 container-fluid" >
+      <!--<form class="form-control">-->
+      <input class="form-control rounded" type="file" name="upload" id="upload-file"></br>
+      <button class="btn btn-primary upload-btn" type="submit">Submit File</button>
+    </div>
+    <form method="get" action="/listFiles" class="rounded" id="List-files">
+      <button type="submit" class="btn btn-lg" id="list-files">List Files</button>
+    </form>
+
+
